@@ -37,15 +37,17 @@ jobs:
 
       - name: Manual Approval
         if: matrix.stage == 'prod'
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: pullRequest } = await context.octokit.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: 'Deployment Approval',
-              head: context.sha,
-              base: 'prod'
-            });
-            console.log('Pull request created:', pullRequest.html_url);
+        run: |
+          echo "Create Deployment Approval Pull Request"
+          TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          RESPONSE=$(curl --request POST \
+            --url https://api.github.com/repos/$GITHUB_REPOSITORY/pulls \
+            --header 'Authorization: Bearer $TOKEN' \
+            --header 'Content-Type: application/json' \
+            --data '{
+              "title": "Deployment Approval",
+              "head": "$GITHUB_SHA",
+              "base": "prod"
+            }')
+          PR_URL=$(echo $RESPONSE | jq -r '.html_url')
+          echo "Pull request created: $PR_URL"
