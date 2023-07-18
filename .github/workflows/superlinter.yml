@@ -19,6 +19,8 @@ jobs:
 
       - name: Configure environment
         run: echo "Stage: ${{ matrix.stage }}"
+        env:
+          STAGE: ${{ matrix.stage }}
 
       - name: Run Super-Linter
         uses: github/super-linter@v4
