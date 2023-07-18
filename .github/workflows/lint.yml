@@ -28,3 +28,10 @@ jobs:
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Manual Approval
+        if: matrix.stage == 'prod'
+        uses: repo/approvals@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          message: 'Approve deployment to prod'
