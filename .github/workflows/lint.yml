@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: {}
 
 jobs:
   super-lint:
@@ -31,7 +32,16 @@ jobs:
 
       - name: Manual Approval
         if: matrix.stage == 'prod'
-        uses: repo/approvals@v1
+        uses: actions/github-script@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          message: 'Approve deployment to prod'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: pullRequest } = await octokit.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Deployment Approval',
+              head: context.sha,
+              base: 'prod'
+            });
+            core.exportVariable('PULL_REQUEST_URL', pullRequest.html_url);
+            core.setNeutralExitCode();
