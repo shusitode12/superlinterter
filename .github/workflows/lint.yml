@@ -4,7 +4,12 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Deployment Stage'
+        required: true
+        default: 'prod'
 
 jobs:
   super-lint:
@@ -36,12 +41,11 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { data: pullRequest } = await octokit.pulls.create({
+            const response = await github.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: 'Deployment Approval',
               head: context.sha,
               base: 'prod'
             });
-            core.exportVariable('PULL_REQUEST_URL', pullRequest.html_url);
-            core.setNeutralExitCode();
+            console.log('Pull request created:', response.data.html_url);
